@@ -22,7 +22,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "git-commit-msg-linter": "^2.4.2",
     "husky": "^4.2.5",
-    "jest": "^26.0.1",
+    "jest": "^25.0.0",
     "lint-staged": "^10.2.2",
     "ts-jest": "^25.4.0",
     "typescript": "^3.8.3"
