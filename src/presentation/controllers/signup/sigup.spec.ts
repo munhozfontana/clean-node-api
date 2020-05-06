@@ -1,9 +1,7 @@
 
+import { EmailValidator, AddAccount, AddAccountModel, AccountModel, HttpRequest } from './signup-protocols'
 import { SignUpController } from './sigup'
-import { EmailValidator, HttpRequest } from '../protocols'
-import { AddAccount, AddAccountModel } from '../../domain/usecases/add-account'
-import { AccountModel } from '../../domain/models/account'
-import { MissingParamError, InvalidParamError, ServerError } from '../erros'
+import { MissingParamError, InvalidParamError, ServerError } from '../../erros'
 
 var fakeHttpRequest: HttpRequest = {}
 
