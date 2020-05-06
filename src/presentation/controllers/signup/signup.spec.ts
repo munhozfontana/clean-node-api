@@ -1,6 +1,6 @@
 
 import { EmailValidator, AddAccount, AddAccountModel, AccountModel, HttpRequest } from './signup-protocols'
-import { SignUpController } from './sigup'
+import { SignUpController } from './signup'
 import { MissingParamError, InvalidParamError, ServerError } from '../../erros'
 
 var fakeHttpRequest: HttpRequest = {}
