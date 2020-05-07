@@ -1,4 +1,4 @@
-import { Encrypter } from '../data/protocols/encrypter'
+import { Encrypter } from '../../data/protocols/encrypter'
 import bcrypt from 'bcrypt'
 
 // import bcrypt from 'bcrypt'
