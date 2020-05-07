@@ -9,10 +9,17 @@ export const MongoHelper = {
       useUnifiedTopology: true
     })
   },
+
   async disconnect (): Promise<void> {
     await this.client.close()
   },
+
   getCollection (name: string): Collection {
     return this.client.db().collection(name)
+  },
+
+  map: (colletion: any): any => {
+    const { _id, ...colletionWithoutId } = colletion
+    return Object.assign({}, colletionWithoutId, { id: _id })
   }
 }
