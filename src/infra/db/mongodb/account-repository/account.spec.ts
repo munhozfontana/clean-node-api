@@ -1,5 +1,6 @@
 import { MongoHelper } from '../helpers/mongo-helper'
 import { AccountMongoRepository } from './account'
+import { AddAccountModel } from '../../../../domain/usecases/add-account'
 
 describe('Account Mongo Repository', () => {
   beforeAll(async () => {
@@ -15,22 +16,37 @@ describe('Account Mongo Repository', () => {
     await accountColletion.deleteMany({})
   })
 
-  const makeSut = (): AccountMongoRepository => {
-    return new AccountMongoRepository()
+  interface TypeSut {
+    sut: AccountMongoRepository
+    addAccountModel: AddAccountModel
   }
 
-  test('should return ', async () => {
-    const sut = makeSut()
-    const account = await sut.add({
+  const makeSut = (): TypeSut => {
+    const addAccountModel = makeAddAccountModel()
+    const sut = new AccountMongoRepository()
+
+    return {
+      addAccountModel,
+      sut
+    }
+  }
+
+  const makeAddAccountModel = (): AddAccountModel => {
+    return {
       name: 'any_name',
       email: 'any_email@mail.com',
       password: 'any_password'
-    })
+    }
+  }
+
+  test('should return ', async () => {
+    const { sut, addAccountModel } = makeSut()
+    const account = await sut.add(addAccountModel)
 
     expect(account).toBeTruthy()
     expect(account.id).toBeTruthy()
-    expect(account.name).toBe('any_name')
-    expect(account.email).toBe('any_email@mail.com')
-    expect(account.password).toBe('any_password')
+    expect(account.name).toBe(addAccountModel.name)
+    expect(account.email).toBe(addAccountModel.email)
+    expect(account.password).toBe(addAccountModel.password)
   })
 })
