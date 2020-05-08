@@ -1,7 +1,12 @@
 import { Controller, HttpRequest, HttpResponse } from '../../presentation/protocols'
 import { LogControllerDecorator } from './log'
 
-const makeControllerStub = (): Controller => {
+interface SutTypes {
+  sut: LogControllerDecorator
+  controllerStub: Controller
+}
+
+const makeController = (): Controller => {
   class ControllerStub implements Controller {
     async handle (httpRequest: HttpRequest): Promise<HttpResponse> {
       const httpResponse: HttpResponse = {
@@ -19,11 +24,19 @@ const makeControllerStub = (): Controller => {
   return new ControllerStub()
 }
 
+const makeSut = (): SutTypes => {
+  const controllerStub = makeController()
+  const sut = new LogControllerDecorator(controllerStub)
+  return {
+    sut,
+    controllerStub
+  }
+}
+
 describe('LogController Decorator', () => {
   test('should call controller haldle', async () => {
-    const controllerStub = makeControllerStub()
+    const { controllerStub, sut } = makeSut()
     const haldleSpy = jest.spyOn(controllerStub, 'handle')
-    const sut = new LogControllerDecorator(controllerStub)
     const httpRequest = {
       body: {
         email: 'any_email',
