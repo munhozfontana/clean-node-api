@@ -92,42 +92,6 @@ const makeFakeAddAccountModel = (): AddAccountModel => {
 }
 
 describe('SingUp Controller', () => {
-  test('Should return 400 if no name is provided', async () => {
-    const { sut, fakeRequest } = makeSut()
-    delete fakeRequest.body.name
-
-    const httpResponse = await sut.handle(fakeRequest)
-
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('name')))
-  })
-
-  test('Should return 400 if no email is provided', async () => {
-    const { sut, fakeRequest } = makeSut()
-    delete fakeRequest.body.email
-
-    const httpResponse = await sut.handle(fakeRequest)
-
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('email')))
-  })
-
-  test('Should return 400 if no password is provided', async () => {
-    const { sut, fakeRequest } = makeSut()
-    delete fakeRequest.body.password
-
-    const httpResponse = await sut.handle(fakeRequest)
-
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('password')))
-  })
-
-  test('Should return 400 if no password confirmation is provided', async () => {
-    const { sut, fakeRequest } = makeSut()
-    delete fakeRequest.body.passwordConfirmation
-
-    const httpResponse = await sut.handle(fakeRequest)
-
-    expect(httpResponse).toEqual(badRequest(new MissingParamError('passwordConfirmation')))
-  })
-
   test('Should return 400 password confirmation fails', async () => {
     const { sut, fakeRequest } = makeSut()
     fakeRequest.body.password = 'invalid_password'
