@@ -1,6 +1,6 @@
 import { LoginController } from './login'
 import { HttpRequest } from '../../protocols'
-import { badRequest, serverError } from '../../helper/http-helper'
+import { badRequest, serverError, unauthorized } from '../../helper/http-helper'
 import { MissingParamError, InvalidParamError } from '../../erros'
 import { EmailValidator } from '../signup/signup-protocols'
 
@@ -37,7 +37,7 @@ const makeEmailValidator = (): EmailValidator => {
 const makeAlthentication = (): Althentication => {
   class AlthenticationStub implements Althentication {
     async auth (_email: string, _password: string): Promise<string> {
-      return new Promise(resolve => resolve('any_token'))
+      return new Promise(resolve => resolve('valid_token'))
     }
   }
   return new AlthenticationStub()
@@ -46,8 +46,8 @@ const makeAlthentication = (): Althentication => {
 const makeFakeHttpRequest = (): HttpRequest => {
   return {
     body: {
-      email: 'any_email@mail.com',
-      password: 'any_password'
+      email: 'valid_email@mail.com',
+      password: 'valid_password'
     }
   }
 }
@@ -107,5 +107,16 @@ describe('Login Controller', () => {
     await sut.handle(fakeHttpRequest)
 
     expect(authSpy).toHaveBeenCalledWith(fakeHttpRequest.body.email, fakeHttpRequest.body.password)
+  })
+
+  test('should return 401 if invalid credentials are provided', async () => {
+    const { sut, fakeHttpRequest, althenticationStub } = makeSut()
+    jest.spyOn(althenticationStub, 'auth').mockReturnValueOnce(
+      new Promise(resolve => resolve(null))
+    )
+
+    const httpResponse = await sut.handle(fakeHttpRequest)
+
+    expect(httpResponse).toEqual(unauthorized())
   })
 })
