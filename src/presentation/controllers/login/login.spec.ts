@@ -8,27 +8,39 @@ interface SutTypes {
   sut: LoginController
   fakeHttpRequest: HttpRequest
   emailValidatorStub: EmailValidator
+  althenticationStub: Althentication
 }
 
 const makeSut = (): SutTypes => {
   const fakeHttpRequest = makeFakeHttpRequest()
   const emailValidatorStub = makeEmailValidator()
+  const althenticationStub = makeAlthentication()
 
-  const sut = new LoginController(emailValidatorStub)
+  const sut = new LoginController(emailValidatorStub, althenticationStub)
   return {
     sut,
     fakeHttpRequest,
-    emailValidatorStub
+    emailValidatorStub,
+    althenticationStub
   }
 }
 
 const makeEmailValidator = (): EmailValidator => {
   class EmailValidatorStub implements EmailValidator {
-    isValid (email: string): boolean {
+    isValid (_email: string): boolean {
       return true
     }
   }
   return new EmailValidatorStub()
+}
+
+const makeAlthentication = (): Althentication => {
+  class AlthenticationStub implements Althentication {
+    async auth (_email: string, _password: string): Promise<string> {
+      return new Promise(resolve => resolve('any_token'))
+    }
+  }
+  return new AlthenticationStub()
 }
 
 const makeFakeHttpRequest = (): HttpRequest => {
@@ -76,6 +88,7 @@ describe('Login Controller', () => {
 
     expect(isValidSpy).toHaveBeenCalledWith(fakeHttpRequest.body.email)
   })
+
   test('should return 500 if EmailValidator throws', async () => {
     const { sut, fakeHttpRequest, emailValidatorStub } = makeSut()
     jest.spyOn(emailValidatorStub, 'isValid').mockImplementationOnce(() => {
@@ -85,5 +98,14 @@ describe('Login Controller', () => {
     const httpResponse = await sut.handle(fakeHttpRequest)
 
     expect(httpResponse).toEqual(serverError(new Error()))
+  })
+
+  test('should call Althentication with correct values', async () => {
+    const { sut, fakeHttpRequest, althenticationStub } = makeSut()
+    const authSpy = jest.spyOn(althenticationStub, 'auth')
+
+    await sut.handle(fakeHttpRequest)
+
+    expect(authSpy).toHaveBeenCalledWith(fakeHttpRequest.body.email, fakeHttpRequest.body.password)
   })
 })
