@@ -2,7 +2,7 @@ import { Controller, HttpRequest, HttpResponse } from '../../presentation/protoc
 import { LogControllerDecorator } from './log'
 
 import { serverError, ok } from '../../presentation/helper/http/http-helper'
-import { LogErrorRepository } from '../../data/protocols/log-error-repositry'
+import { LogErrorRepository } from '../../data/protocols/db/log-error-repositry'
 
 interface SutTypes {
   sut: LogControllerDecorator
