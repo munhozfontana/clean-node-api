@@ -1,6 +1,22 @@
 import { AccountModel } from '../../../domain/models/account'
 import { LoadAccountByEmailRepository } from '../../protocols/load-account-by-email-repository'
-import { DbAuthenticaiton } from './db-authentication'
+import { DbAuthentication } from './db-authentication'
+import { AuthenticationModel } from '../../../domain/usecases/althentication'
+
+interface SutTypes {
+  sut: DbAuthentication
+  loadAccountByEmailRepository: LoadAccountByEmailRepository
+}
+
+const makeSut = (): SutTypes => {
+  const loadAccountByEmailRepository = makeLoadAccountByEmailRepository()
+
+  const sut = new DbAuthentication(loadAccountByEmailRepository)
+  return {
+    sut,
+    loadAccountByEmailRepository
+  }
+}
 
 const makeAccountModel = (): AccountModel => {
   return {
@@ -11,21 +27,25 @@ const makeAccountModel = (): AccountModel => {
   }
 }
 
+const makeLoadAccountByEmailRepository = (): LoadAccountByEmailRepository => {
+  class LoadAccountByEmailRepositoryStub implements LoadAccountByEmailRepository {
+    async load (email: string): Promise<AccountModel> {
+      return new Promise(resolve => resolve(makeAccountModel()))
+    }
+  }
+
+  return new LoadAccountByEmailRepositoryStub()
+}
+
+const makeAuthenticationModel = (): AuthenticationModel => {
+  return { email: 'valid_email@gmail.com', password: 'valid_password' }
+}
+
 describe('DbAuthentication UseCase', () => {
   test('should  all LoadAccountByEmailRepository with corret email', async () => {
-    class LoadAccountByEmailRepositoryStub implements LoadAccountByEmailRepository {
-      async load (email: string): Promise<AccountModel> {
-        return new Promise(resolve => resolve(makeAccountModel()))
-      }
-    }
-
-    const loadAccountByEmailRepository = new LoadAccountByEmailRepositoryStub()
-    const sut = new DbAuthenticaiton(loadAccountByEmailRepository)
-
+    const { sut, loadAccountByEmailRepository } = makeSut()
     const loadSpy = jest.spyOn(loadAccountByEmailRepository, 'load')
-
-    await sut.auth({ email: 'valid_email@gmail.com', password: 'valid_password' })
-
+    await sut.auth(makeAuthenticationModel())
     expect(loadSpy).toHaveBeenCalledWith('valid_email@gmail.com')
   })
 })
