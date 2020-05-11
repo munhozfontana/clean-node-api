@@ -92,15 +92,6 @@ const makeFakeAddAccountModel = (): AddAccountModel => {
 }
 
 describe('SingUp Controller', () => {
-  test('Should return 400 password confirmation fails', async () => {
-    const { sut, fakeRequest } = makeSut()
-    fakeRequest.body.password = 'invalid_password'
-
-    const httpResponse = await sut.handle(fakeRequest)
-
-    expect(httpResponse).toEqual(badRequest(new InvalidParamError('passwordConfirmation')))
-  })
-
   test('Should return 400 if invalid email is provided', async () => {
     const { sut, emailValidatorStub, fakeRequest } = makeSut()
     jest.spyOn(emailValidatorStub, 'isValid').mockReturnValueOnce(false)
