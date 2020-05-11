@@ -136,4 +136,10 @@ describe('DbAuthentication UseCase', () => {
     const promise = sut.auth(makeAuthenticationModel())
     await expect(promise).rejects.toThrow()
   })
+
+  test('should call TokenGenerator with correct id', async () => {
+    const { sut, authenticationModel } = makeSut()
+    const result = await sut.auth(authenticationModel)
+    expect(result).toBe('valid_token')
+  })
 })
