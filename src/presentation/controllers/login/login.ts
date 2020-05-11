@@ -1,12 +1,12 @@
-import { Controller, HttpRequest, HttpResponse, Althentication } from './login-protocols'
+import { Controller, HttpRequest, HttpResponse, Authentication } from './login-protocols'
 import { badRequest, unauthorized, serverError, ok } from '../../helper/http/http-helper'
 import { Validation } from '../signup/signup-protocols'
 
 export class LoginController implements Controller {
-  private readonly althentication: Althentication
+  private readonly althentication: Authentication
   private readonly validation: Validation
 
-  constructor (althentication: Althentication, validation: Validation) {
+  constructor (althentication: Authentication, validation: Validation) {
     this.althentication = althentication
     this.validation = validation
   }
@@ -19,7 +19,7 @@ export class LoginController implements Controller {
       }
 
       const { email, password } = body
-      const accessToken = await this.althentication.auth(email, password)
+      const accessToken = await this.althentication.auth({ email, password })
       if (!accessToken) {
         return unauthorized()
       }
