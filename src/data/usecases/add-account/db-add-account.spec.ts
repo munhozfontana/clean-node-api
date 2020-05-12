@@ -39,7 +39,7 @@ const makeHasher = (): Hasher => {
 
 const makeAddAccountRepository = (): AddAccountRepository => {
   class AddAccountRepositoryStub implements AddAccountRepository {
-    async add (_accountData: AddAccountModel): Promise<AccountModel> {
+    async addAccount (_accountData: AddAccountModel): Promise<AccountModel> {
       return new Promise(resolve => resolve(makeFakeAccountModel()))
     }
   }
@@ -86,7 +86,7 @@ describe('DbAddAccount Usecase', () => {
 
   test('Should call AddAccountRepository with correct password', async () => {
     const { sut, addAccountRepositoryStub, fakeAddAccountModel, fakeAccountModel } = makeSut()
-    const addSpy = jest.spyOn(addAccountRepositoryStub, 'add')
+    const addSpy = jest.spyOn(addAccountRepositoryStub, 'addAccount')
     delete fakeAccountModel.id
     fakeAccountModel.password = 'hashed_password'
 
@@ -97,7 +97,7 @@ describe('DbAddAccount Usecase', () => {
 
   test('Should throw if addAccountRepository throws', async () => {
     const { addAccountRepositoryStub, sut, fakeAddAccountModel } = makeSut()
-    jest.spyOn(addAccountRepositoryStub, 'add').mockReturnValueOnce(new Promise((resolve, reject) => {
+    jest.spyOn(addAccountRepositoryStub, 'addAccount').mockReturnValueOnce(new Promise((resolve, reject) => {
       reject(new Error())
     }))
 

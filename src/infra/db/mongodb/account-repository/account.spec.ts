@@ -41,7 +41,7 @@ describe('Account Mongo Repository', () => {
 
   test('should return ', async () => {
     const { sut, addAccountModel } = makeSut()
-    const account = await sut.add(addAccountModel)
+    const account = await sut.addAccount(addAccountModel)
 
     expect(account).toBeTruthy()
     expect(account.id).toBeTruthy()
