@@ -25,7 +25,10 @@ export const MongoHelper = {
   },
 
   map: (colletion: any): any => {
-    const { _id, ...colletionWithoutId } = colletion
-    return Object.assign({}, colletionWithoutId, { id: _id })
+    if (colletion) {
+      const obj = { ...colletion, id: colletion._id }
+      delete obj._id
+      return obj
+    }
   }
 }
