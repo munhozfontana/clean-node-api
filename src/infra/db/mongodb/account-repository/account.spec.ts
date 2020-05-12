@@ -1,6 +1,9 @@
 import { MongoHelper } from '../helpers/mongo-helper'
 import { AccountMongoRepository } from './account'
 import { AddAccountModel } from '../../../../domain/usecases/add-account'
+import { Collection } from 'mongodb'
+
+let accountColletion: Collection
 
 describe('Account Mongo Repository', () => {
   beforeAll(async () => {
@@ -12,7 +15,7 @@ describe('Account Mongo Repository', () => {
   })
 
   beforeEach(async () => {
-    const accountColletion = await MongoHelper.getCollection('accounts')
+    accountColletion = await MongoHelper.getCollection('accounts')
     await accountColletion.deleteMany({})
   })
 
@@ -39,10 +42,20 @@ describe('Account Mongo Repository', () => {
     }
   }
 
-  test('should return ', async () => {
+  test('should return an account on add success', async () => {
     const { sut, addAccountModel } = makeSut()
     const account = await sut.addAccount(addAccountModel)
+    expect(account).toBeTruthy()
+    expect(account.id).toBeTruthy()
+    expect(account.name).toBe(addAccountModel.name)
+    expect(account.email).toBe(addAccountModel.email)
+    expect(account.password).toBe(addAccountModel.password)
+  })
 
+  test('should return an account on loadByEmail success', async () => {
+    const { sut, addAccountModel } = makeSut()
+    await accountColletion.insertOne(addAccountModel)
+    const account = await sut.loadAccountByEmail(addAccountModel.email)
     expect(account).toBeTruthy()
     expect(account.id).toBeTruthy()
     expect(account.name).toBe(addAccountModel.name)
