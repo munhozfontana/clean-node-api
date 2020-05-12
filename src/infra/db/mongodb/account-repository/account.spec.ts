@@ -45,6 +45,7 @@ describe('Account Mongo Repository', () => {
   test('should return an account on add success', async () => {
     const { sut, addAccountModel } = makeSut()
     const account = await sut.addAccount(addAccountModel)
+
     expect(account).toBeTruthy()
     expect(account.id).toBeTruthy()
     expect(account.name).toBe(addAccountModel.name)
@@ -52,20 +53,22 @@ describe('Account Mongo Repository', () => {
     expect(account.password).toBe(addAccountModel.password)
   })
 
-  test('should return an account on loadByEmail success', async () => {
+  test('should return an account on load b success', async () => {
     const { sut, addAccountModel } = makeSut()
-    await accountColletion.insertOne(addAccountModel)
-    const account = await sut.loadAccountByEmail(addAccountModel.email)
+    const account = await sut.addAccount(addAccountModel)
+
     expect(account).toBeTruthy()
     expect(account.id).toBeTruthy()
     expect(account.name).toBe(addAccountModel.name)
     expect(account.email).toBe(addAccountModel.email)
     expect(account.password).toBe(addAccountModel.password)
   })
-
-  test('should return null on loadByEmail fails', async () => {
+  test('should update the account accessToken on updateAccessToken Success', async () => {
     const { sut, addAccountModel } = makeSut()
-    const account = await sut.loadAccountByEmail(addAccountModel.email)
-    expect(account).toBeFalsy()
+    const { ops } = await accountColletion.insertOne(addAccountModel)
+    await sut.updateAccessToken(ops[0]._id, 'any_token')
+    const result = await accountColletion.findOne({ _id: ops[0]._id })
+    expect(result).toBeTruthy()
+    expect(result.accessToken).toBe('any_token')
   })
 })
