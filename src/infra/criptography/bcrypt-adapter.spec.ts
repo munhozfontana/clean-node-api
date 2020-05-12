@@ -48,4 +48,11 @@ describe('Bcrept Adapter', () => {
     const hash = await sut.compare('any_value', 'any_hash')
     expect(hash).toBe(true)
   })
+
+  test('Should call true when compare fails', async () => {
+    const sut = makeSut()
+    jest.spyOn(bcrypt, 'compare').mockResolvedValueOnce(false)
+    const hash = await sut.compare('any_value', 'any_hash')
+    expect(hash).toBe(false)
+  })
 })
