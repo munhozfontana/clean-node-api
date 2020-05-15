@@ -6,20 +6,20 @@ import { AuthenticationModel } from '../../../domain/usecases/althentication'
 
 interface SutTypes {
   sut: LoginController
-  fakeHttpRequest: HttpRequest
+  httpRequest: HttpRequest
   althenticationStub: Authentication
   validationStub: Validation
 }
 
 const makeSut = (): SutTypes => {
-  const fakeHttpRequest = makeFakeHttpRequest()
+  const httpRequest = makehttpRequest()
   const althenticationStub = makeAlthentication()
   const validationStub = makeValidation()
 
   const sut = new LoginController(althenticationStub, validationStub)
   return {
     sut,
-    fakeHttpRequest,
+    httpRequest,
     althenticationStub,
     validationStub
   }
@@ -34,7 +34,7 @@ const makeAlthentication = (): Authentication => {
   return new AlthenticationStub()
 }
 
-const makeFakeHttpRequest = (): HttpRequest => {
+const makehttpRequest = (): HttpRequest => {
   return {
     body: {
       email: 'valid_email@mail.com',
@@ -54,61 +54,61 @@ const makeValidation = (): Validation => {
 
 describe('Login Controller', () => {
   test('should call Althentication with correct values', async () => {
-    const { sut, fakeHttpRequest, althenticationStub } = makeSut()
+    const { sut, httpRequest, althenticationStub } = makeSut()
     const authSpy = jest.spyOn(althenticationStub, 'auth')
 
-    await sut.handle(fakeHttpRequest)
+    await sut.handle(httpRequest)
 
     expect(authSpy).toHaveBeenCalledWith({
-      email: fakeHttpRequest.body.email,
-      password: fakeHttpRequest.body.password
+      email: httpRequest.body.email,
+      password: httpRequest.body.password
     })
   })
 
   test('should return 401 if invalid credentials are provided', async () => {
-    const { sut, fakeHttpRequest, althenticationStub } = makeSut()
+    const { sut, httpRequest, althenticationStub } = makeSut()
     jest.spyOn(althenticationStub, 'auth').mockReturnValueOnce(
       new Promise(resolve => resolve(null))
     )
 
-    const httpResponse = await sut.handle(fakeHttpRequest)
+    const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse).toEqual(unauthorized())
   })
 
   test('should return 500 if Althentication throws', async () => {
-    const { sut, fakeHttpRequest, althenticationStub } = makeSut()
+    const { sut, httpRequest, althenticationStub } = makeSut()
     jest.spyOn(althenticationStub, 'auth').mockRejectedValueOnce(() => {
       throw new Error()
     })
 
-    const httpResponse = await sut.handle(fakeHttpRequest)
+    const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse).toEqual(serverError(new Error()))
   })
 
   test('should return 200 if valid credentials are provided', async () => {
-    const { sut, fakeHttpRequest } = makeSut()
+    const { sut, httpRequest } = makeSut()
 
-    const httpResponse = await sut.handle(fakeHttpRequest)
+    const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse).toEqual(ok({ accessToken: 'valid_token' }))
   })
 
   test('Should call Validation with correct value', async () => {
-    const { sut, fakeHttpRequest, validationStub } = makeSut()
+    const { sut, httpRequest, validationStub } = makeSut()
     const validateSpy = jest.spyOn(validationStub, 'validate')
 
-    await sut.handle(fakeHttpRequest)
+    await sut.handle(httpRequest)
 
-    expect(validateSpy).toHaveBeenCalledWith(fakeHttpRequest.body)
+    expect(validateSpy).toHaveBeenCalledWith(httpRequest.body)
   })
 
   test('Should return 200 Validation returns an errors', async () => {
-    const { sut, fakeHttpRequest, validationStub } = makeSut()
+    const { sut, httpRequest, validationStub } = makeSut()
     jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('any_field'))
 
-    const httpResponse = await sut.handle(fakeHttpRequest)
+    const httpResponse = await sut.handle(httpRequest)
 
     expect(httpResponse).toEqual(badRequest(new MissingParamError('any_field')))
   })
