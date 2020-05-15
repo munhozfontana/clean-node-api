@@ -4,31 +4,35 @@ import { SignUpController } from './signup-controller'
 import { MissingParamError, ServerError } from '../../erros'
 import { ok, badRequest, serverError } from '../../helper/http/http-helper'
 import { Validation } from '../../protocols/validation'
+import { Authentication, AuthenticationModel } from '../login/login-controller-protocols'
 
 interface SutTypes {
   sut: SignUpController
   addAccountStub: AddAccount
   validationStub: Validation
-  request: HttpRequest
-  accountModel: AccountModel
-  addAccountModel: AddAccountModel
+  httpRequestStub: HttpRequest
+  accountModelStub: AccountModel
+  addAccountModelStub: AddAccountModel
+  authenticationStub: Authentication
 }
 
 const makeSut = (): SutTypes => {
   const addAccountStub = makeAddAccount()
-  const request = makeHttpRequest()
-  const accountModel = makeAccountModel()
-  const addAccountModel = makeAddAccountModel()
+  const httpRequestStub = makeHttpRequest()
+  const accountModelStub = makeAccountModel()
+  const addAccountModelStub = makeAddAccountModel()
   const validationStub = makeValidation()
+  const authenticationStub = makeAlthentication()
 
-  const sut = new SignUpController(addAccountStub, validationStub)
+  const sut = new SignUpController(addAccountStub, validationStub, authenticationStub)
   return {
     sut,
     addAccountStub,
     validationStub,
-    request,
-    accountModel,
-    addAccountModel
+    httpRequestStub,
+    accountModelStub,
+    addAccountModelStub,
+    authenticationStub
   }
 }
 
@@ -43,11 +47,20 @@ const makeAddAccount = (): AddAccount => {
 
 const makeValidation = (): Validation => {
   class ValidationStub implements Validation {
-    validate (input: any): Error {
+    validate (_input: any): Error {
       return null
     }
   }
   return new ValidationStub()
+}
+
+const makeAlthentication = (): Authentication => {
+  class AlthenticationStub implements Authentication {
+    async auth (_authtentication: AuthenticationModel): Promise<string> {
+      return new Promise(resolve => resolve('valid_token'))
+    }
+  }
+  return new AlthenticationStub()
 }
 
 const makeHttpRequest = (): HttpRequest => {
@@ -81,46 +94,58 @@ const makeAddAccountModel = (): AddAccountModel => {
 
 describe('SingUp Controller', () => {
   test('Should return 500 if AddAccount throws ', async () => {
-    const { sut, addAccountStub, request } = makeSut()
+    const { sut, addAccountStub, httpRequestStub } = makeSut()
     jest.spyOn(addAccountStub, 'add').mockImplementationOnce(() => { throw new Error() })
 
-    const httpResponse = await sut.handle(request)
+    const httpResponse = await sut.handle(httpRequestStub)
 
     expect(httpResponse).toEqual(serverError(new ServerError(null)))
   })
 
   test('Should call AddAccount with correct email', async () => {
-    const { sut, addAccountStub, request, addAccountModel } = makeSut()
+    const { sut, addAccountStub, httpRequestStub, addAccountModelStub } = makeSut()
     const addSpy = jest.spyOn(addAccountStub, 'add')
 
-    await sut.handle(request)
+    await sut.handle(httpRequestStub)
 
-    expect(addSpy).toHaveBeenCalledWith(addAccountModel)
+    expect(addSpy).toHaveBeenCalledWith(addAccountModelStub)
   })
 
   test('Should return 200 valid data is provided', async () => {
-    const { sut, request, accountModel } = makeSut()
+    const { sut, httpRequestStub, accountModelStub } = makeSut()
 
-    const httpResponse = await sut.handle(request)
+    const httpResponse = await sut.handle(httpRequestStub)
 
-    expect(httpResponse).toEqual(ok(accountModel))
+    expect(httpResponse).toEqual(ok(accountModelStub))
   })
 
   test('Should call Validation with correct value', async () => {
-    const { sut, request, validationStub } = makeSut()
+    const { sut, httpRequestStub, validationStub } = makeSut()
     const validateSpy = jest.spyOn(validationStub, 'validate')
 
-    await sut.handle(request)
+    await sut.handle(httpRequestStub)
 
-    expect(validateSpy).toHaveBeenCalledWith(request.body)
+    expect(validateSpy).toHaveBeenCalledWith(httpRequestStub.body)
   })
 
   test('Should return 200 Validation returns an errors', async () => {
-    const { sut, request, validationStub } = makeSut()
+    const { sut, httpRequestStub, validationStub } = makeSut()
     jest.spyOn(validationStub, 'validate').mockReturnValueOnce(new MissingParamError('any_field'))
 
-    const httpResponse = await sut.handle(request)
+    const httpResponse = await sut.handle(httpRequestStub)
 
     expect(httpResponse).toEqual(badRequest(new MissingParamError('any_field')))
+  })
+
+  test('should call Althentication with correct values', async () => {
+    const { sut, httpRequestStub, authenticationStub } = makeSut()
+    const authSpy = jest.spyOn(authenticationStub, 'auth')
+
+    await sut.handle(httpRequestStub)
+
+    expect(authSpy).toHaveBeenCalledWith({
+      email: httpRequestStub.body.email,
+      password: httpRequestStub.body.password
+    })
   })
 })
