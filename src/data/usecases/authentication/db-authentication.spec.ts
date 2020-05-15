@@ -70,7 +70,7 @@ const makeAuthenticationModel = (): AuthenticationModel => {
 
 const makeHashComparer = (): HashComparer => {
   class HashComparerStub implements HashComparer {
-    async compare (value: string, hash: string): Promise<boolean> {
+    async compare (_value: string, _hash: string): Promise<boolean> {
       return new Promise(resolve => resolve(true))
     }
   }
@@ -80,7 +80,7 @@ const makeHashComparer = (): HashComparer => {
 
 const makeEncrypter = (): Encrypter => {
   class EncrypterStub implements Encrypter {
-    async encrypt (id: string): Promise<string> {
+    async encrypt (_id: string): Promise<string> {
       return new Promise(resolve => resolve('valid_token'))
     }
   }
@@ -90,7 +90,7 @@ const makeEncrypter = (): Encrypter => {
 
 const makeUpdateAccessTokenRepository = (): UpdateAccessTokenRepository => {
   class UpdateAccessTokenRepositoryStub implements UpdateAccessTokenRepository {
-    async updateAccessToken (id: string, token: string): Promise<void> {
+    async updateAccessToken (_id: string, _token: string): Promise<void> {
       return new Promise(resolve => resolve())
     }
   }
